@@ -10,19 +10,21 @@ random.seed(time.perf_counter())
 
 
 class Test1(QWidget):
-    testFinished = Signal()
+    testFinished = Signal()  # Signal that is emitted after the end of the test
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.testName = 'Stroop Test'
         self.settingsTab = parent.settingsTab
 
+        # Test parameters
         self.colorButtons = []
         self.startTimes = []
         self.endTimes = []
         self.correctClicks = 0
         self.testInProgress = False
 
+        # Window elements creation and configuration
         self.infoLabel = QLabel("INSTRUCTION: Click the button that corresponds to the text color.")
         self.phaseLabel = QLabel("Phase: -")
         self.trialLabel = QLabel("Trial: -")
@@ -67,18 +69,21 @@ class Test1(QWidget):
             button.setEnabled(enabled)
 
     def countdown(self):
+        # Counting from value in timeTrialsSpinbox to 0 (start)
         if self.remainingTime > 0:
             self.testLabel.setText(f"{self.remainingTime}")
             self.remainingTime -= 1
         else:
             self.timer.stop()
             self.testLabel.setText("Start")
-            QTimer.singleShot(1000, self.startTrial)
+            QTimer.singleShot(1000, self.startTrial)    # Wait for 1000 ms before function
 
     def startTest(self):
+        # Configure buttons
         self.startButton.setEnabled(False)
         self.setColorButtonsEnabled(True)
 
+        # Get parameters from settings
         self.trainTrials = self.settingsTab.trainTrialsSpinbox.value()
         self.trainTrialsLeft = self.trainTrials
         self.testTrials = self.settingsTab.testTrialsSpinbox.value()
@@ -88,12 +93,14 @@ class Test1(QWidget):
     def prepareTrial(self):
         self.clearLayout()
 
+        # Create timer to count from value in timeTrialsSpinbox to 0 (start)
         self.timer = QTimer(self)
         self.timer.setInterval(1000)
         self.timer.timeout.connect(self.countdown)
         self.remainingTime = self.settingsTab.timeTrialsSpinbox.value()
         self.timer.start()
 
+        # Update info labels
         if self.trainTrialsLeft > 0:
             self.phaseLabel.setText("Phase: train")
             font = QtGui.QFont()
@@ -110,35 +117,40 @@ class Test1(QWidget):
         self.trialLabel.setText(f"Trial: {trialNum}/{allTrials}")
 
     def startTrial(self):
+        # Get random word and color from list
         word = random.choice(self.colors)
         color = random.choice(self.colors)
 
+        # Update test label
         self.correctColor = color
         self.testLabel.setText(word)
         self.testLabel.setStyleSheet(f"color: {color}")
 
+        # Get time of start and update flag
         self.startTime = time.perf_counter()
         self.testInProgress = True
 
     def prepareNextTrial(self):
         self.clearLayout()
-        QTimer.singleShot(1000, self.prepareTrial)
+        QTimer.singleShot(1000, self.prepareTrial)  # Wait for 1000 ms before function
 
     def onButtonClick(self, button, selectedColor):
+        # Check if the user tries clicking before the trial begins
         if not self.testInProgress:
             return
 
+        # Update flags. Get time of the end. Calculate the difference between start and end time
         self.testInProgress = False
         self.endTime = time.perf_counter()
         self.startTimes.append(self.endTime - self.startTime)
 
         correct = selectedColor == self.correctColor
 
-        if self.trainTrialsLeft > 0:
-            self.updateButtonColor(button, correct)
-            QTimer.singleShot(1000, self.prepareNextTrial)
+        if self.trainTrialsLeft > 0:    # Train phase
+            self.updateButtonColor(button, correct)  # To show if chosen color is correct
+            QTimer.singleShot(1000, self.prepareNextTrial)  # Wait for 1000 ms (to see changed color) before function
             self.trainTrialsLeft -= 1
-        else:
+        else:   # Test phase
             if correct:
                 self.correctClicks += 1
 
@@ -157,6 +169,7 @@ class Test1(QWidget):
             button.setStyleSheet("background-color: red")
 
     def clearLayout(self):
+        # Clear test label and reset button colors (train phase)
         if hasattr(self, 'testLabel'):
             self.testLabel.setText("")
             self.testLabel.setStyleSheet("")
@@ -165,15 +178,18 @@ class Test1(QWidget):
             button.setStyleSheet("")
 
     def endTest(self):
+        # Summarizing results
         self.endTimes = self.startTimes[self.trainTrials:]
         self.averageTime = sum(self.endTimes) / len(self.endTimes)
         self.correctClicksPercentage = (self.correctClicks / self.testTrials) * 100
         self.startButton.setEnabled(True)
 
+        # Reset parameters and emit a signal of finishing (to switch to the next tab)
         self.correctClicks = 0
         self.testInProgress = False
         self.clearLayout()
         self.testFinished.emit()
 
+        # Update test section in the results tab
         mainWindow = self.window()
         mainWindow.resultsTab.updateResultsTest1(self.averageTime, self.correctClicksPercentage, self.endTimes)

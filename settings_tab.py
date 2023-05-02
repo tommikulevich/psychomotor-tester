@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QVBoxLayout, QWidget, QLabel, QPushButton, QSpinBo
 class SettingsTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        # Window elements creation and configuration
         self.trainTrialsSpinbox = QSpinBox()
         self.trainTrialsSpinbox.setRange(1, 20)
         self.trainTrialsSpinbox.setValue(3)
