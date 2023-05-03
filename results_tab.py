@@ -1,3 +1,4 @@
+from PySide2 import QtGui, QtCore
 from PySide2.QtCharts import QtCharts
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QVBoxLayout, QWidget, QLabel, QGroupBox, QScrollArea
@@ -112,6 +113,7 @@ class ResultsTab(QWidget):
         chart.addSeries(series)
         chart.setTitle("Touch Test Results")
         chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+        chart.legend().hide()
 
         categories = [f"Trial #{i + 1}" for i in range(len(endTimes))]
         axisX = QtCharts.QBarCategoryAxis()
@@ -173,6 +175,7 @@ class ResultsTab(QWidget):
         chart.addSeries(series)
         chart.setTitle("Object Tracking Test Results")
         chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
+        chart.legend().hide()
 
         categories = [f"Trial #{i + 1}" for i in range(len(endTimes))]
         axisX = QtCharts.QBarCategoryAxis()

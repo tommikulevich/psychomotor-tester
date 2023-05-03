@@ -29,7 +29,7 @@ class Test2(QWidget):
         self.stimulusShown = False
 
         # Window elements creation and configuration
-        self.infoLabel = QLabel(f"INSTRUCTION: Press the 'Click' button when you see the {self.correctColor} rectangle"
+        self.infoLabel = QLabel(f"INSTRUCTION: Press the 'Click' button when you see the {self.correctColor} rectangle "
                                 f"or the 'No Click' button when not.")
         self.phaseLabel = QLabel("Phase: -")
         self.trialLabel = QLabel("Trial: -")
